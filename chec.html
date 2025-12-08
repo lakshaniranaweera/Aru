@@ -37,7 +37,7 @@ body, html {
     position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;
 }
 
-#gamePage { flex-direction:column; background:url('back.jpeg') no-repeat center/cover; }
+#gamePage { flex-direction:column; background:url('https://lakshaniranaweera.github.io/Aru/back.jpeg') no-repeat center/cover; }
 
 .grid { display:grid; grid-template-columns:repeat(4,160px); grid-gap:100px; padding-right:75px; margin-top:60px; }
 .card { width:240px; height:240px; perspective:1000px; cursor:pointer; position:relative; }
@@ -73,7 +73,7 @@ body, html {
 }
 
 .grid .card .card-front {
-  background-image: url('logo.png');
+  background-image: url('https://lakshaniranaweera.github.io/Aru/logo.png');
   background-repeat:no-repeat;
   background-position:center;
   background-size:cover;
@@ -103,10 +103,10 @@ body, html {
 <div id="settingsIcon" onclick="openAdmin()">⚙️</div>
 
 <!-- AUDIO -->
-<audio id="pageSound" src="page.mp3" loop></audio>
-<audio id="selectSound" src="select.mp3"></audio>
-<audio id="winnerSound" src="winner.mp3"></audio>
-<audio id="lossSound" src="loss.mp3"></audio>
+<audio id="pageSound" src="https://lakshaniranaweera.github.io/Aru/page.mp3" loop></audio>
+<audio id="selectSound" src="https://lakshaniranaweera.github.io/Aru/select.mp3"></audio>
+<audio id="winnerSound" src="https://lakshaniranaweera.github.io/Aru/winner.mp3"></audio>
+<audio id="lossSound" src="https://lakshaniranaweera.github.io/Aru/loss.mp3"></audio>
 
 <!-- ADMIN PAGE -->
 <div id="adminPage">
@@ -123,11 +123,11 @@ body, html {
 <!-- INTRO VIDEO PAGE -->
 <div id="videoPage">
   <video autoplay id="introVideo">
-    <source src="intro1.mp4" type="video/mp4">
+    <source src="https://lakshaniranaweera.github.io/Aru/intro1.mp4" type="video/mp4">
   </video>
 </div>
 
-<div id="startPage" style="background:url('background.png') center/cover no-repeat;">
+<div id="startPage" style="background:url('https://lakshaniranaweera.github.io/Aru/background.png') center/cover no-repeat;">
 </div>
 
 <!-- GAME PAGE -->
@@ -141,64 +141,77 @@ body, html {
 <!-- VIDEO RESULT PAGES -->
 <div id="winnerDrink" class="winnerPage">
     <video autoplay loop>
-        <source src="win.mp4" type="video/mp4">
+        <source src="https://lakshaniranaweera.github.io/Aru/win.mp4" type="video/mp4">
     </video>
 </div>
 
 <div id="timeoutPage" class="winnerPage">
     <video autoplay loop>
-        <source src="loss.mp4" type="video/mp4">
+        <source src="https://lakshaniranaweera.github.io/Aru/loss.mp4" type="video/mp4">
     </video>
 </div>
 
 <div id="noGiftPage" class="winnerPage">
     <video autoplay loop>
-        <source src="loss.mp4" type="video/mp4">
+        <source src="https://lakshaniranaweera.github.io/Aru/loss.mp4" type="video/mp4">
     </video>
 </div>
 
 <script>
 /* INTRO VIDEO ROTATION */
-const introVideos = ["intro1.mp4","intro2.mp4","intro3.mp4"];
+const introVideos = [
+  "https://lakshaniranaweera.github.io/Aru/intro1.mp4",
+  "https://lakshaniranaweera.github.io/Aru/intro2.mp4",
+  "https://lakshaniranaweera.github.io/Aru/intro3.mp4"
+];
 let currentIntroIndex = 0;
 
 function setNextIntroVideo() {
   const introVideo = document.getElementById("introVideo");
   introVideo.src = introVideos[currentIntroIndex];
   introVideo.load();
-  introVideo.play();
-  currentIntroIndex++;
-  if (currentIntroIndex >= introVideos.length) currentIntroIndex = 0;
+  introVideo.play().catch(()=>{});
+  currentIntroIndex = (currentIntroIndex + 1) % introVideos.length;
 }
 
-/* Cookies */
-function setCookie(n,v,d){ const t=new Date(); t.setTime(t.getTime()+(d*86400000)); document.cookie=n+"="+JSON.stringify(v)+";expires="+t.toUTCString()+";path=/"; }
-function getCookie(n){ const c=document.cookie.split("; ").find(r=>r.startsWith(n+"=")); return c?JSON.parse(c.split("=")[1]):null; }
-
+/* Local Storage */
 let defaultTime=20;
 
-let gameTime=getCookie("gameTime")||defaultTime;
-let playCount = getCookie("playCount") || 0;
-let winnerCount = getCookie("winnerCount") || 0; // remaining winners
+let gameTime = parseInt(localStorage.getItem("gameTime")) || defaultTime;
+let playCount = parseInt(localStorage.getItem("playCount")) || 0;
+let winnerCount = parseInt(localStorage.getItem("winnerCount")) || 0;
 
+function saveSettings(key, value){
+    localStorage.setItem(key, value);
+}
+
+/* Admin Panel */
 function loadAdminForm(){
   document.getElementById("prizeDrink").value = winnerCount;
   document.getElementById("gameTime").value = gameTime;
+  updateAdminPanelLabels();
+}
+
+function updateAdminPanelLabels(){
   document.getElementById("playCountLabel").innerText = playCount;
   document.getElementById("winnerCountLabel").innerText = winnerCount;
 }
 
 function saveAdminSettings(){
-  winnerCount = parseInt(document.getElementById("prizeDrink").value); // starting winner count
+  winnerCount = parseInt(document.getElementById("prizeDrink").value);
   gameTime = parseInt(document.getElementById("gameTime").value);
-  setCookie("winnerCount", winnerCount, 7);
-  setCookie("gameTime", gameTime, 7);
+  saveSettings("winnerCount", winnerCount);
+  saveSettings("gameTime", gameTime);
   document.getElementById("adminPage").style.display = "none";
-  loadAdminForm();
+  updateAdminPanelLabels();
 }
 
-function openAdmin(){ loadAdminForm(); document.getElementById("adminPage").style.display="flex"; }
+function openAdmin(){
+  loadAdminForm();
+  document.getElementById("adminPage").style.display="flex";
+}
 
+/* GAME LOGIC */
 let selectedCards=[], matchedPairs=0, countdown=20, countdownInterval;
 
 const pageSound=document.getElementById("pageSound");
@@ -215,7 +228,7 @@ window.onload=()=>{
   document.getElementById("startPage").addEventListener("click", startGame);
 };
 
-introVideo.addEventListener("ended", function () { setNextIntroVideo(); });
+introVideo.addEventListener("ended", setNextIntroVideo);
 
 function pauseAllVideos(){ document.querySelectorAll("video").forEach(v=>v.pause()); }
 
@@ -228,7 +241,8 @@ function goStart(){
 
 function startGame(){
   playCount++;
-  setCookie("playCount", playCount, 7);
+  saveSettings("playCount", playCount);
+  updateAdminPanelLabels();
   document.getElementById("startPage").style.display="none";
   document.getElementById("gamePage").style.display="flex";
   pageSound.play().catch(()=>{});
@@ -238,7 +252,14 @@ function startGame(){
 
 function initBoard(){
   matchedPairs=0; selectedCards=[];
-  const images=["1.jpg","2.png","3.jpg","4.png","5.png","6.png"];
+  const images=[
+    "https://lakshaniranaweera.github.io/Aru/1.jpg",
+    "https://lakshaniranaweera.github.io/Aru/2.png",
+    "https://lakshaniranaweera.github.io/Aru/3.jpg",
+    "https://lakshaniranaweera.github.io/Aru/4.png",
+    "https://lakshaniranaweera.github.io/Aru/5.png",
+    "https://lakshaniranaweera.github.io/Aru/6.png"
+  ];
   const cardImages=[...images,...images].sort(()=>0.5-Math.random());
   const board=document.getElementById("gameBoard");
   board.innerHTML="";
@@ -294,35 +315,35 @@ function showWinner(){
 
   if(winnerCount<=0){ showNoGift(); return; }
 
-  winnerCount--; // decrease remaining winners
-  setCookie("winnerCount", winnerCount, 7);
-  document.getElementById("winnerCountLabel").innerText = winnerCount;
+  winnerCount--;
+  saveSettings("winnerCount", winnerCount);
+  updateAdminPanelLabels();
 
   const p=document.getElementById("winnerDrink");
   p.style.display="flex";
   const video = p.querySelector("video");
-  video.play();
+  video.play().catch(()=>{});
   p.onclick=()=>goVideo();
 }
 
-function showTimeout(){ 
-  pageSound.pause(); 
+function showTimeout(){
+  pageSound.pause();
   lossSound.play().catch(()=>{});
-  document.getElementById("gamePage").style.display="none"; 
+  document.getElementById("gamePage").style.display="none";
   pauseAllVideos();
   const p=document.getElementById("timeoutPage");
   p.style.display="flex";
-  p.querySelector("video").play();
+  p.querySelector("video").play().catch(()=>{});
   p.onclick=()=>goVideo();
 }
 
-function showNoGift(){ 
-  pageSound.pause(); 
+function showNoGift(){
+  pageSound.pause();
   lossSound.play().catch(()=>{});
   pauseAllVideos();
   const p=document.getElementById("noGiftPage");
   p.style.display="flex";
-  p.querySelector("video").play();
+  p.querySelector("video").play().catch(()=>{});
   p.onclick=()=>goVideo();
 }
 
