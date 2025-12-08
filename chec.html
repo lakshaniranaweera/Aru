@@ -184,8 +184,14 @@ let winnerCount = getCookie("winnerCount") || 0; // remaining winners
 function loadAdminForm(){
   document.getElementById("prizeDrink").value = winnerCount;
   document.getElementById("gameTime").value = gameTime;
-  document.getElementById("playCountLabel").innerText = playCount;
-  document.getElementById("winnerCountLabel").innerText = winnerCount;
+  updateAdminPanelLabels(); // ✅ live update
+}
+
+function updateAdminPanelLabels() {
+    const playLabel = document.getElementById("playCountLabel");
+    const winnerLabel = document.getElementById("winnerCountLabel");
+    if (playLabel) playLabel.innerText = playCount;
+    if (winnerLabel) winnerLabel.innerText = winnerCount;
 }
 
 function saveAdminSettings(){
@@ -194,10 +200,13 @@ function saveAdminSettings(){
   setCookie("winnerCount", winnerCount, 7);
   setCookie("gameTime", gameTime, 7);
   document.getElementById("adminPage").style.display = "none";
-  loadAdminForm();
+  updateAdminPanelLabels();
 }
 
-function openAdmin(){ loadAdminForm(); document.getElementById("adminPage").style.display="flex"; }
+function openAdmin(){ 
+  loadAdminForm(); 
+  document.getElementById("adminPage").style.display="flex"; 
+}
 
 let selectedCards=[], matchedPairs=0, countdown=20, countdownInterval;
 
@@ -229,6 +238,7 @@ function goStart(){
 function startGame(){
   playCount++;
   setCookie("playCount", playCount, 7);
+  updateAdminPanelLabels(); // ✅ live update
   document.getElementById("startPage").style.display="none";
   document.getElementById("gamePage").style.display="flex";
   pageSound.play().catch(()=>{});
@@ -297,8 +307,7 @@ function showWinner(){
   // ✅ Update remaining winners live
   winnerCount--;
   setCookie("winnerCount", winnerCount, 7);
-  const winnerLabel = document.getElementById("winnerCountLabel");
-  if (winnerLabel) winnerLabel.innerText = winnerCount;
+  updateAdminPanelLabels(); // ✅ live update
 
   const p=document.getElementById("winnerDrink");
   p.style.display="flex";
