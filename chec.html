@@ -114,9 +114,17 @@ body, html {
   <form id="adminForm">
     <label>Winner Count: <input type="number" id="prizeDrink"></label>
     <label>Game Time (seconds): <input type="number" id="gameTime"></label>
+    
     <button type="button" onclick="saveAdminSettings()">Save Settings</button>
+
     <label>Play Count: <span id="playCountLabel"></span></label>
-    <label>Remaining Winners: <span id="winnerCountLabel"></span></label>
+
+    <!-- 🔴 NEW CLEAR BUTTON -->
+    <button type="button" id="clearPlayBtn" onclick="clearPlayCount()" 
+      style="background:red; color:white; font-size:28px; padding:15px; border-radius:20px;">
+      Clear Play Count
+    </button>
+
   </form>
 </div>
 
@@ -194,7 +202,6 @@ function loadAdminForm(){
 
 function updateAdminPanelLabels(){
   document.getElementById("playCountLabel").innerText = playCount;
-  document.getElementById("winnerCountLabel").innerText = winnerCount;
 }
 
 function saveAdminSettings(){
@@ -204,6 +211,12 @@ function saveAdminSettings(){
   saveSettings("gameTime", gameTime);
   document.getElementById("adminPage").style.display = "none";
   updateAdminPanelLabels();
+}
+
+function clearPlayCount(){
+    playCount = 0;
+    saveSettings("playCount", playCount);
+    updateAdminPanelLabels();
 }
 
 function openAdmin(){
@@ -317,7 +330,6 @@ function showWinner(){
 
   winnerCount--;
   saveSettings("winnerCount", winnerCount);
-  updateAdminPanelLabels();
 
   const p=document.getElementById("winnerDrink");
   p.style.display="flex";
